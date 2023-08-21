@@ -2,20 +2,38 @@ const path = require("path");
 const Article = require("../models/articles.models");
 
 const getArticles = async (req, res) => {
-  // res.json("api is running");
-    console.log(req.params);
-   const page = req.query.page || 1;
-   const limit = req.query.limit || 15;
-   const skip = (page - 1) * limit;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 15;
+  const skip = (page - 1) * limit;
 
+  const filters = {};
+
+  if (req.query.categories) {
+      const categories = req.query.categories.split(",");
+      filters.category = { $in: categories };
+  }
+
+  if (req.query.subcategories) {
+      const subcategories = req.query.subcategories.split(",");
+      filters.sub_category = { $in: subcategories };
+  }
+
+  if (req.query.company) {
+      filters.company = req.query.company;
+  }
+  console.log(filters);
   try {
-    const articles = await Article.find({}).skip(skip).limit(limit);
-    //console.log(data)
-    res.json({ articles: articles.reverse() });
-  } catch(error) {
-    res.status(400).json("error",error);
+      const articles = await Article.find(filters)
+          .skip(skip)
+          .limit(limit)
+          .sort({ date_created: -1 }); // Assuming you want to sort by date_created in descending order
+
+      res.json({ articles });
+  } catch (error) {
+      res.status(400).json({ error: error.message });
   }
 };
+
 const postArticles = async (req, res) => {
   // res.json(req.body);
 
