@@ -3,34 +3,40 @@ const Article = require("../models/articles.models");
 
 const getArticles = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 15;
+  const limit = parseInt(req.query.limit) || 34;
   const skip = (page - 1) * limit;
+
+  console.log("query", req.query);
 
   const filters = {};
 
   if (req.query.categories) {
-      const categories = req.query.categories.split(",");
-      filters.category = { $in: categories };
+    // const categories = req.query.categories.split(",");
+    // filters.category = { $in: categories };
+    filters.category = { $in: req.query.categories };
   }
 
   if (req.query.subcategories) {
-      const subcategories = req.query.subcategories.split(",");
-      filters.sub_category = { $in: subcategories };
+    // const subcategories = req.query.subcategories.split(",");
+    // filters.sub_category = { $in: subcategories };
+    filters.sub_category = { $in: req.query.subcategories };
   }
 
-  if (req.query.company) {
-      filters.company = req.query.company;
+  if (req.query.authors) {
+    // const authors_find = req.query.authors.split(",");
+    // filters.authors = { $in: authors_find };
+    filters.authors = { $in: req.query.authors };
   }
   console.log(filters);
   try {
-      const articles = await Article.find(filters)
-          .skip(skip)
-          .limit(limit)
-          .sort({ date_created: -1 }); // Assuming you want to sort by date_created in descending order
-
-      res.json({ articles });
+    const articles = await Article.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .sort({ date_created: -1 }); // Assuming you want to sort by date_created in descending order
+    console.log("articles", articles.length);
+    res.json({ articles });
   } catch (error) {
-      res.status(400).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -40,9 +46,9 @@ const postArticles = async (req, res) => {
   // console.log(req.body);
 
   try {
-    // const articles = new Article(req.body);
-    // await articles.save();
-    const articles = await Article.insertMany(req.body);
+    const articles = new Article(req.body);
+    await articles.save();
+    // const articles = await Article.insertMany(req.body);
 
     res.json({
       articles,

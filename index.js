@@ -22,4 +22,40 @@ mongoose.connect(Uri, { useNewUrlParser: true });
 //for the routes users
 app.use("/articles", articlesRouter);
 
+let tokenA = require("jsonwebtoken");
+
+app.use(express.json());
+
+app.post("/loginUser", async function (req, res) {
+  let token = tokenA.sign({ userKiId: req.body }, "apple sweet", {
+    expiresIn: "2d",
+  });
+
+  res.json({
+    token,
+  });
+});
+
+app.post("/googleLogin", async function (req, res) {
+  let token = tokenA.sign({ userKiId: req.body }, "apple sweet", {
+    expiresIn: "2d",
+  });
+
+  res.json({
+    token,
+  });
+});
+
+app.use(function (err, req, res, cb) {
+  switch (err.code) {
+    case 100:
+      res.json({
+        message: "USER ALERADY EXIST",
+        code: 300,
+        helpingCode: 299,
+      });
+      break;
+  }
+});
+
 app.listen(process.env.PORT || 5000);
